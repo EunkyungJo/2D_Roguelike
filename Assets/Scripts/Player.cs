@@ -1,16 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 //Player inherits from MovingObject, our base class for objects that can move, Enemy also inherits from this.
 public class Player : MovingObject
 {
-	public float restartLevelDelay = 1f;		//Delay time in seconds to restart level.
-	public int pointsPerFood = 10;				//Number of points to add to player food points when picking up a food object.
-	public int pointsPerSoda = 20;				//Number of points to add to player food points when picking up a soda object.
-	public int wallDamage = 1;					//How much damage a player does to a wall when chopping it.
+	public float restartLevelDelay = 1f;        //Delay time in seconds to restart level.
+	public int pointsPerFood = 10;              //Number of points to add to player food points when picking up a food object.
+	public int pointsPerSoda = 20;              //Number of points to add to player food points when picking up a soda object.
+	public int wallDamage = 1;                  //How much damage a player does to a wall when chopping it.
 
-	private Animator animator;					//Used to store a reference to the Player's animator component.
-	private int food;							//Used to store player food points total during level.
+	private Animator animator;                  //Used to store a reference to the Player's animator component.
+	private int food;                           //Used to store player food points total during level.
 
 	//Start overrides the Start function of MovingObject
 	protected override void Start ()
@@ -35,11 +36,10 @@ public class Player : MovingObject
 	private void Update ()
 	{
 		//If it's not the player's turn, exit the function.
-		if(!GameManager.instance.playersTurn) 
-			return;
+		if(!GameManager.instance.playersTurn) return;
 
-		int horizontal = 0;  	//Used to store the horizontal move direction.
-		int vertical = 0;		//Used to store the vertical move direction.
+		int horizontal = 0;     //Used to store the horizontal move direction.
+		int vertical = 0;       //Used to store the vertical move direction.
 
 		//Get input from the input manager, round it to an integer and store in horizontal to set x axis move direction
 		horizontal = (int) (Input.GetAxisRaw ("Horizontal"));
@@ -47,13 +47,13 @@ public class Player : MovingObject
 		//Get input from the input manager, round it to an integer and store in vertical to set y axis move direction
 		vertical = (int) (Input.GetAxisRaw ("Vertical"));
 
-		//Check if moving horizontally, if so set vertical to zero. 
-		//to prevent player from moving diagonally 
+		//Check if moving horizontally, if so set vertical to zero.
+		//to prevent player from moving diagonally
 		if(horizontal != 0)
 		{
 			vertical = 0;
 		}
-	
+
 		//Check if we have a non-zero value for horizontal or vertical
 		if(horizontal != 0 || vertical != 0)
 		{
@@ -76,13 +76,18 @@ public class Player : MovingObject
 		//Hit allows us to reference the result of the Linecast done in Move.
 		RaycastHit2D hit;
 
+		//If Move returns true, meaning Player was able to move into an empty space.
+		if (Move (xDir, yDir, out hit)) 
+		{
+			//Call RandomizeSfx of SoundManager to play the move sound, passing in two audio clips to choose from.
+		}
+
 		//Since the player has moved and lost food points, check if the game has ended.
 		CheckIfGameOver ();
 
 		//Set the playersTurn boolean of GameManager to false now that players turn is over.
 		GameManager.instance.playersTurn = false;
 	}
-
 
 	//OnCantMove overrides the abstract function OnCantMove in MovingObject.
 	//It takes a generic parameter T which in the case of Player is a Wall which the player can attack and destroy.
@@ -97,8 +102,7 @@ public class Player : MovingObject
 		//Set the attack trigger of the player's animation controller in order to play the player's attack animation.
 		animator.SetTrigger ("playerChop");
 	}
-
-
+		
 	//OnTriggerEnter2D is sent when another object enters a trigger collider attached to this object (2D physics only).
 	private void OnTriggerEnter2D (Collider2D other)
 	{
@@ -128,6 +132,7 @@ public class Player : MovingObject
 			//Add pointsPerSoda to players food points total
 			food += pointsPerSoda;
 
+
 			//Disable the soda object the player collided with.
 			other.gameObject.SetActive (false);
 		}
@@ -137,8 +142,9 @@ public class Player : MovingObject
 	private void Restart ()
 	{
 		//Load the last scene loaded, in this case Main, the only scene in the game.
-		Application.LoadLevel (Application.loadedLevel);
+		SceneManager.LoadScene (SceneManager.GetActiveScene().buildIndex);
 	}
+
 
 	//LoseFood is called when an enemy attacks the player.
 	//It takes a parameter loss which specifies how many points to lose.
@@ -154,12 +160,14 @@ public class Player : MovingObject
 		CheckIfGameOver ();
 	}
 
+
 	//CheckIfGameOver checks if the player is out of food points and if so, ends the game.
 	private void CheckIfGameOver ()
 	{
 		//Check if food point total is less than or equal to zero.
 		if (food <= 0) 
 		{
+
 			//Call the GameOver function of GameManager.
 			GameManager.instance.GameOver ();
 		}

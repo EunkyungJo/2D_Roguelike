@@ -1,24 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public abstract class MovingObject : MonoBehaviour {
-	//The abstract keyword enables you to create classes and class members that are incomplete and must be implemented in a derived class.
+//The abstract keyword enables you to create classes and class members that are incomplete and must be implemented in a derived class.
+public abstract class MovingObject : MonoBehaviour
+{
+	public float moveTime = 0.1f;           //Time it will take object to move, in seconds.
+	public LayerMask blockingLayer;         //Layer on which collision will be checked.
 
-	public float moveTime = 0.1f;	//Time it will take object to move, in seconds.
-	public LayerMask blockingLayer; //Layer on which collision will be checked.
-
-	private BoxCollider2D boxCollider;
-	private Rigidbody2D rb2D;
-	private float inverseMoveTime; //Used to make movement more efficient.
+	private BoxCollider2D boxCollider;      //The BoxCollider2D component attached to this object.
+	private Rigidbody2D rb2D;               //The Rigidbody2D component attached to this object.
+	private float inverseMoveTime;          //Used to make movement more efficient.
 
 	//Protected, virtual functions can be overridden by inheriting classes.
-	protected virtual void Start () 
+	protected virtual void Start ()
 	{
-		boxCollider = GetComponent<BoxCollider2D> ();
-		rb2D = GetComponent<Rigidbody2D> ();
+		//Get a component reference to this object's BoxCollider2D
+		boxCollider = GetComponent <BoxCollider2D> ();
+
+		//Get a component reference to this object's Rigidbody2D
+		rb2D = GetComponent <Rigidbody2D> ();
 
 		//By storing the reciprocal of the move time we can use it by multiplying instead of dividing, this is more efficient.
-		inverseMoveTime = 1f / moveTime; 
+		inverseMoveTime = 1f / moveTime;
 	}
 
 	//Move returns true if it is able to move and false if not. 
@@ -53,7 +56,7 @@ public abstract class MovingObject : MonoBehaviour {
 		//If something was hit, return false, Move was unsuccesful.
 		return false;
 	}
-
+		
 	//Co-routine for moving units from one space to next, takes a parameter end to specify where to move to.
 	protected IEnumerator SmoothMovement (Vector3 end)
 	{
@@ -75,12 +78,11 @@ public abstract class MovingObject : MonoBehaviour {
 
 			//Return and loop until sqrRemainingDistance is close enough to zero to end the function
 			yield return null;
-		}		
+		}
 	}
 
 	//The virtual keyword means AttemptMove can be overridden by inheriting classes using the override keyword.
-	//AttemptMove takes a generic parameter T to specify the type of component we expect our unit to interact with, if blocked. 
-	//(Player for Enemies, Wall for Player).
+	//AttemptMove takes a generic parameter T to specify the type of component we expect our unit to interact with if blocked (Player for Enemies, Wall for Player).
 	protected virtual void AttemptMove <T> (int xDir, int yDir)
 		where T : Component
 	{
@@ -104,12 +106,9 @@ public abstract class MovingObject : MonoBehaviour {
 			//Call the OnCantMove function and pass it hitComponent as a parameter.
 			OnCantMove (hitComponent);
 	}
-
+		
 	//The abstract modifier indicates that the thing being modified has a missing or incomplete implementation.
 	//OnCantMove will be overriden by functions in the inheriting classes.
-	//abstract function -> no opening or closing brackets
 	protected abstract void OnCantMove <T> (T component)
-		//takes a generic parameter T as well as a parameter of the type T called Component
 		where T : Component;
 }
-	
