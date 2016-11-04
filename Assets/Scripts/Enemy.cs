@@ -15,7 +15,7 @@ public class Enemy : MovingObject
 	{
 		//Register this enemy with our instance of GameManager by adding it to a list of Enemy objects. 
 		//This allows the GameManager to issue movement commands.
-		//GameManager.instance.AddEnemyToList (this);
+		GameManager.instance.AddEnemyToList (this);
 
 		//Get and store a reference to the attached Animator component.
 		animator = GetComponent<Animator> ();
@@ -78,6 +78,6 @@ public class Enemy : MovingObject
 		hitPlayer.LoseFood (playerDamage);
 
 		//Set the attack trigger of animator to trigger Enemy attack animation.
-		animator.SetTrigger ("enemyAttack");
+		animator.SetTrigger ("EnemyAttack");
 	}
 }

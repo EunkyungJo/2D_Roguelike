@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 //Player inherits from MovingObject, our base class for objects that can move, Enemy also inherits from this.
 public class Player : MovingObject
@@ -9,6 +10,7 @@ public class Player : MovingObject
 	public int pointsPerFood = 10;              //Number of points to add to player food points when picking up a food object.
 	public int pointsPerSoda = 20;              //Number of points to add to player food points when picking up a soda object.
 	public int wallDamage = 1;                  //How much damage a player does to a wall when chopping it.
+	public Text foodText;
 
 	private Animator animator;                  //Used to store a reference to the Player's animator component.
 	private int food;                           //Used to store player food points total during level.
@@ -21,6 +23,8 @@ public class Player : MovingObject
 
 		//Get the current food point total stored in GameManager.instance between levels.
 		food = GameManager.instance.playerFoodPoints;
+
+		foodText.text = "Food: " + food;
 
 		//Call the Start function of the MovingObject base class.
 		base.Start ();
@@ -36,7 +40,11 @@ public class Player : MovingObject
 	private void Update ()
 	{
 		//If it's not the player's turn, exit the function.
-		if(!GameManager.instance.playersTurn) return;
+		if (!GameManager.instance.playersTurn) 
+		{
+			Debug.Log ("This is enemy's Turn.");
+			return;
+		}
 
 		int horizontal = 0;     //Used to store the horizontal move direction.
 		int vertical = 0;       //Used to store the vertical move direction.
@@ -70,6 +78,8 @@ public class Player : MovingObject
 		//Every time player moves, subtract from food points total.
 		food--;
 
+		foodText.text = "Food: " + food;
+
 		//Call the AttemptMove method of the base class, passing in the component T (in this case Wall) and x and y direction to move.
 		base.AttemptMove <T> (xDir, yDir);
 
@@ -100,7 +110,7 @@ public class Player : MovingObject
 		hitWall.DamageWall (wallDamage);
 
 		//Set the attack trigger of the player's animation controller in order to play the player's attack animation.
-		animator.SetTrigger ("playerChop");
+		animator.SetTrigger ("PlayerChop");
 	}
 		
 	//OnTriggerEnter2D is sent when another object enters a trigger collider attached to this object (2D physics only).
@@ -122,6 +132,9 @@ public class Player : MovingObject
 			//Add pointsPerFood to the players current food total.
 			food += pointsPerFood;
 
+			//Update foodText to represent current total and notify player that they gained points
+			foodText.text = "+" + pointsPerFood + " Food: " + food;
+
 			//Disable the food object the player collided with.
 			other.gameObject.SetActive (false);
 		}
@@ -132,6 +145,8 @@ public class Player : MovingObject
 			//Add pointsPerSoda to players food points total
 			food += pointsPerSoda;
 
+			//Update foodText to represent current total and notify player that they gained points
+			foodText.text = "+" + pointsPerSoda + " Food: " + food;
 
 			//Disable the soda object the player collided with.
 			other.gameObject.SetActive (false);
@@ -151,10 +166,13 @@ public class Player : MovingObject
 	public void LoseFood (int loss)
 	{
 		//Set the trigger for the player animator to transition to the playerHit animation.
-		animator.SetTrigger ("playerHit");
+		animator.SetTrigger ("PlayerHit");
 
 		//Subtract lost food points from the players total.
 		food -= loss;
+
+		//Update the food display with the new total.
+		foodText.text = "-"+ loss + " Food: " + food;
 
 		//Check to see if game has ended.
 		CheckIfGameOver ();
